@@ -2,49 +2,43 @@ $DangerousCount = 0
 $SafeCount = 0
 $SafetyReports = Get-Content "H:\My_Workspace\Powershell-Scripts\Advent of Code 2024\Day02-Input.txt"
 forEach($report in $SafetyReports){
-    $thisCheck = $report.Split(' ')
+    $thisCheck = New-Object System.Collections.ArrayList
+    foreach($element in $report.Split(' ')){$thisCheck.add($element)}
     $thisState = $null
     $Dampener = 0
-    $nextCheck = $null
-    for($i=0;$i -le $($thisCheck.Length-1);$i++){
+    for($i=0;$i -le $($thisCheck.Count-1);$i++){
         if($Dampener -gt 1){
             $DangerousCount++
             Write-Host "Dampener used more than once, $thisCheck is Dangerous"
             Break
         }
-        if($i -eq $thisCheck.Length-1){
+        if($i -eq $thisCheck.Count-1){
             $SafeCount++
             Write-Host "$thisCheck is Safe"
             Break
         }
-        if($null -eq $nextCheck){
-            $CheckResult = $thisCheck[$i] - $thisCheck[$i+1]
-        }
-        else{
-            $CheckResult = $nextCheck - $thisCheck[$i+1]
-            $nextCheck = $null
-        }
+        $CheckResult = $thisCheck[$i] - $thisCheck[$i+1]
         Write-Host "Change is $CheckResult"
         switch($CheckResult){
         {$_ -eq 0}{
             $Dampener++
             Write-Host "No change, $thisCheck is using Dampener"
-            $nextCheck = $thisCheck[$i]
-            if($i -lt $thisCheck.Length-2){$i++}
+            $thisCheck.RemoveAt($i+1)
+            $i--
             Break
         }
         {$_ -lt -3}{
             $Dampener++
             Write-Host "Change is greater than 3, $thisCheck is using Dampener"
-            $nextCheck = $thisCheck[$i]
-            if($i -lt $thisCheck.Length-2){$i++}
+            $thisCheck.RemoveAt($i+1)
+            $i--
             Break
         }
         {$_ -gt 3}{
             $Dampener++
             Write-Host "Change is greater than 3, $thisCheck is using Dampener"
-            $nextCheck = $thisCheck[$i]
-            if($i -lt $thisCheck.Length-2){$i++}
+            $thisCheck.RemoveAt($i+1)
+            $i--
             Break
         }
         {$_ -le -1 -and $_ -ge -3}{
@@ -55,8 +49,8 @@ forEach($report in $SafetyReports){
             if($thisState -eq "Decreasing"){
                 $Dampener++
                 Write-Host "Was decreasing now increasing, $thisCheck is using Dampener"
-                $nextCheck = $thisCheck[$i]
-                if($i -lt $thisCheck.Length-2){$i++}
+                $thisCheck.RemoveAt($i+1)
+                $i--
                 Break
             }
             else{
@@ -71,8 +65,8 @@ forEach($report in $SafetyReports){
             if($thisState -eq "Increasing"){
                 $Dampener++
                 Write-Host "Was Increasing now decreasing, $thisCheck is using Dampener"
-                $nextCheck = $thisCheck[$i]
-                if($i -lt $thisCheck.Length-2){$i++}
+                $thisCheck.RemoveAt($i+1)
+                $i--
                 Break
             }
             else{
